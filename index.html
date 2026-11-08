@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RollyFly – Classroom layouts that reset themselves</title>
+  <meta name="description"
+    content="Press a button and watch a classroom rearrange from rows of desks into two concentric circles, one piece at a time and without collisions.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&family=Patrick+Hand&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --paper: #fbfdff;
+      --grid: #d3e4f4;
+      --ink: #1d2b4f;
+      --ink-soft: #46557c;
+      --pencil: #f7c948;
+      --margin-red: #e5534b;
+      --board: #1f3b33;
+      --board-deep: #16302a;
+      --chalk: #f4f6ef;
+      --wood: #b5854f;
+      --wood-dark: #8c6236;
+      --display: "Lexend", "Trebuchet MS", system-ui, sans-serif;
+      --hand: "Patrick Hand", "Comic Sans MS", cursive;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: var(--display);
+      font-size: 1.0625rem;
+      line-height: 1.65;
+      background-color: var(--paper);
+      /* graph-paper background */
+      background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    :focus-visible {
+      outline: 3px solid var(--ink);
+      outline-offset: 3px;
+    }
+
+    .wrap {
+      width: min(1040px, 100% - 2.5rem);
+      margin-inline: auto;
+    }
+
+    /* ---------- header ---------- */
+    header {
+      background: var(--ink);
+      color: var(--paper);
+      border-bottom: 6px solid var(--pencil);
+    }
+
+    header .wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding-block: 1rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      font-weight: 700;
+      font-size: 1.3rem;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+    }
+
+    .brand svg {
+      width: 1.7rem;
+      height: 1.7rem;
+    }
+
+    nav a {
+      margin-left: 1.5rem;
+      text-decoration: none;
+      font-weight: 500;
+      opacity: .85;
+    }
+
+    nav a:hover {
+      opacity: 1;
+      text-decoration: underline;
+      text-decoration-color: var(--pencil);
+      text-underline-offset: 6px;
+    }
+
+    /* ---------- intro ---------- */
+    .intro {
+      padding-block: 3.5rem 2rem;
+    }
+
+    .intro .note {
+      display: inline-block;
+      font-family: var(--hand);
+      font-size: 1.35rem;
+      background: var(--pencil);
+      padding: .15rem .9rem;
+      transform: rotate(-1.5deg);
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-weight: 700;
+      font-size: clamp(2.2rem, 5.5vw, 3.9rem);
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      margin: 0 0 1rem;
+      max-width: 18ch;
+    }
+
+    .lede {
+      color: var(--ink-soft);
+      max-width: 56ch;
+      margin: 0;
+    }
+
+    /* ---------- the classroom board ---------- */
+    .board-section {
+      padding-block: 1.5rem 3.5rem;
+    }
+
+    .board-frame {
+      background: var(--wood);
+      border-radius: 10px 10px 0 0;
+      padding: clamp(10px, 2vw, 18px);
+      box-shadow: inset 0 0 0 3px var(--wood-dark), 0 10px 0 -2px rgba(29, 43, 79, .12);
+    }
+
+    .board {
+      background: var(--board);
+      border-radius: 4px;
+      padding: clamp(8px, 1.6vw, 16px);
+      box-shadow: inset 0 0 40px rgba(0, 0, 0, .45);
+    }
+
+    video {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 75vh;
+      background: #000;
+      border-radius: 2px;
+    }
+
+    .tray {
+      background: var(--wood-dark);
+      border-radius: 0 0 10px 10px;
+      padding: 1rem clamp(1rem, 3vw, 1.6rem) 1.1rem;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .65rem;
+      font: 600 1.1rem var(--display);
+      background: var(--pencil);
+      color: var(--ink);
+      border: 0;
+      border-radius: 8px;
+      padding: .8rem 1.4rem .8rem 1.1rem;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #c9a022;
+      transition: transform .08s, box-shadow .08s;
+    }
+
+    .btn:hover {
+      background: #fbd45d;
+    }
+
+    .btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #c9a022;
+    }
+
+    .btn svg {
+      width: 1.3rem;
+      height: 1.3rem;
+    }
+
+    .track {
+      height: 8px;
+      background: rgba(244, 246, 239, .25);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .track span {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: var(--chalk);
+    }
+
+    .status {
+      font-family: var(--hand);
+      font-size: 1.25rem;
+      color: var(--chalk);
+      min-width: 12ch;
+      text-align: right;
+    }
+
+    .chalk {
+      display: flex;
+      gap: .35rem;
+    }
+
+    .chalk i {
+      display: block;
+      width: 26px;
+      height: 8px;
+      border-radius: 3px;
+      background: var(--chalk);
+    }
+
+    .chalk i:nth-child(2) {
+      width: 18px;
+      background: #f2c9d0;
+    }
+
+    /* ---------- notebook page: lesson notes ---------- */
+    .lesson {
+      padding-block: 0 4rem;
+    }
+
+    .notebook {
+      background-color: #fff;
+      background-image: repeating-linear-gradient(transparent 0 35px, #cfe0f1 35px 36px);
+      border: 2px solid var(--ink);
+      border-radius: 6px;
+      box-shadow: 8px 8px 0 var(--ink);
+      padding: 2.2rem clamp(1.2rem, 4vw, 3rem) 2rem clamp(3.2rem, 8vw, 5.5rem);
+      position: relative;
+    }
+
+    .notebook::before {
+      /* red margin line */
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: clamp(2.2rem, 6vw, 4rem);
+      width: 2px;
+      background: var(--margin-red);
+    }
+
+    .notebook h2 {
+      font-weight: 700;
+      font-size: 1.9rem;
+      letter-spacing: -0.02em;
+      margin: 0 0 .3rem;
+      line-height: 36px;
+    }
+
+    .notebook .sub {
+      font-family: var(--hand);
+      font-size: 1.3rem;
+      color: var(--ink-soft);
+      margin: 0 0 1.4rem;
+      line-height: 36px;
+    }
+
+    .notebook ol {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: s;
+    }
+
+    .notebook li {
+      counter-increment: s;
+      margin-bottom: 36px;
+    }
+
+    .notebook li h3 {
+      font-size: 1.1rem;
+      margin: 0;
+      line-height: 36px;
+    }
+
+    .notebook li h3::before {
+      content: "Step " counter(s) ": ";
+      font-family: var(--hand);
+      font-weight: 400;
+      font-size: 1.35rem;
+      color: var(--margin-red);
+    }
+
+    .notebook li p {
+      margin: 0;
+      line-height: 36px;
+      color: var(--ink-soft);
+    }
+
+    .notice {
+      margin-top: 1.2rem;
+    }
+
+    .notice h2 {
+      font-size: 1.3rem;
+    }
+
+    .notice ul {
+      margin: 0;
+      padding-left: 1.2rem;
+    }
+
+    .notice li {
+      line-height: 36px;
+      margin: 0;
+    }
+
+    footer {
+      background: var(--ink);
+      color: var(--paper);
+      padding-block: 2rem;
+      font-size: .95rem;
+      border-top: 6px solid var(--pencil);
+    }
+
+    footer .wrap {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    @media (max-width: 720px) {
+      nav {
+        display: none;
+      }
+
+      .tray {
+        grid-template-columns: 1fr;
+        justify-items: start;
+        gap: .9rem;
+      }
+
+      .track {
+        width: 100%;
+      }
+
+      .status {
+        text-align: left;
+      }
+
+      .chalk {
+        display: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      .btn {
+        transition: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="wrap">
+      <a class="brand" href="#">
+        <svg viewBox="0 0 32 32" aria-hidden="true">
+          <path d="M5 27l2-7 14-14 5 5-14 14z" fill="#f7c948" />
+          <path d="M21 6l5 5 2-2a2.1 2.1 0 0 0 0-3l-2-2a2.1 2.1 0 0 0-3 0z" fill="#e5534b" />
+          <path d="M5 27l2-7 5 5z" fill="#fbfdff" />
+        </svg>
+        RollyFly
+      </a>
+      <nav aria-label="Main">
+        <a href="#demo">Demo</a>
+        <a href="#lesson">Lesson notes</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="intro">
+      <div class="wrap">
+        <span class="note">Today’s demonstration</span>
+        <h1>See a Classroom Reset Itself.</h1>
+        <p class="lede">Nine desks, nine chairs and the teacher’s area move from straight rows into two circles, one
+          piece at a time and without a single collision. Press the button under the board to begin.</p>
+      </div>
+    </section>
+
+    <section class="board-section" id="demo">
+      <div class="wrap">
+        <div class="board-frame">
+          <div class="board">
+            <!-- classroom_rearrange.mp4 must sit in the same folder as this file.
+               #t=0.001 makes phones show the first frame instead of a black box. -->
+            <video id="vid" playsinline muted preload="auto" disablepictureinpicture disableremoteplayback>
+              <source src="classroom_rearrange.mp4#t=0.001" type="video/mp4">
+              Your browser can’t play this video.
+            </video>
+          </div>
+        </div>
+        <div class="tray">
+          <button class="btn" id="start" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="12" fill="#1d2b4f" />
+              <path d="M9.5 7.5v9l7-4.5z" fill="#f7c948" />
+            </svg>
+            Start Rearrange
+          </button>
+          <div class="track" aria-hidden="true"><span id="bar"></span></div>
+          <div class="status" id="status" role="status" aria-live="polite">Ready</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="lesson" id="lesson">
+      <div class="wrap">
+        <div class="notebook">
+          <h2>Lesson notes</h2>
+          <p class="sub">What happens on the board</p>
+          <ol>
+            <li>
+              <h3>Everything moves to the walls</h3>
+              <p>Every desk and chair clears the floor first, so the middle of the room is empty.</p>
+            </li>
+            <li>
+              <h3>Desks form the inner circle</h3>
+              <p>One desk at a time takes its place, following a path that avoids everything else.</p>
+            </li>
+            <li>
+              <h3>Chairs form the outer circle</h3>
+              <p>Each chair then settles around its desk, facing the centre of the room.</p>
+            </li>
+          </ol>
+          <div class="notice">
+            <h2>Can you spot these?</h2>
+            <ul>
+              <li>Only one piece of furniture moves at a time.</li>
+              <li>Nothing overlaps and nothing passes through a wall.</li>
+              <li>Both circles share the same centre.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="contact">
+    <div class="wrap">
+      <span>© <span id="year">2026</span> RollyFly</span>
+      <a href="mailto:info@example.com">info@example.com</a>
+    </div>
+  </footer>
+
+  <script>
+    const vid = document.getElementById('vid');
+    const btn = document.getElementById('start');
+    const bar = document.getElementById('bar');
+    const status = document.getElementById('status');
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Every press: jump back to the very beginning and play once. The video stops on its last frame.
+    btn.addEventListener('click', () => {
+      vid.currentTime = 0;
+      const p = vid.play();
+      if (p) p.catch(() => { status.textContent = 'Tap Start Rearrange again'; });
+    });
+
+    vid.addEventListener('play', () => { status.textContent = 'Rearranging…'; });
+    vid.addEventListener('timeupdate', () => {
+      if (vid.duration) bar.style.width = (vid.currentTime / vid.duration * 100) + '%';
+    });
+    vid.addEventListener('ended', () => { bar.style.width = '100%'; status.textContent = 'Done – press again to restart'; });
+    vid.addEventListener('error', () => {
+      status.textContent = 'Video not found';
+      btn.disabled = true;
+    });
+  </script>
+</body>
+
+</html>
