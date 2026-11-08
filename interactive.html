@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RollyFly – Rearrange the classroom yourself</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#fbfdff;--grid:#d3e4f4;--ink:#1d2b4f;--soft:#46557c;--pencil:#f7c948;--red:#e5534b;--green:#2e7d4f;--display:"Lexend","Trebuchet MS",system-ui,sans-serif;--hand:"Patrick Hand","Comic Sans MS",cursive}
+*{box-sizing:border-box}
+body{margin:0;color:var(--ink);font:1.0625rem/1.6 var(--display);background:var(--paper) linear-gradient(var(--grid) 1px,transparent 1px) 0 0/28px 28px;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px)}
+a{color:inherit}:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.wrap{width:min(1100px,100% - 2rem);margin-inline:auto}
+header{background:var(--ink);color:var(--paper);border-bottom:6px solid var(--pencil)}
+header .wrap{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding-block:1rem}
+.brand{font-weight:700;font-size:1.3rem;text-decoration:none}
+nav a{margin-left:1.4rem;text-decoration:none;font-weight:500;opacity:.8}
+nav a:hover,nav a[aria-current]{opacity:1;text-decoration:underline;text-decoration-color:var(--pencil);text-underline-offset:6px}
+.intro{padding-block:2.5rem 1.2rem}
+.note{display:inline-block;font:1.35rem var(--hand);background:var(--pencil);padding:.1rem .9rem;transform:rotate(-1.5deg);margin-bottom:.8rem}
+h1{font-size:clamp(2rem,5vw,3.3rem);line-height:1.1;letter-spacing:-.03em;margin:0 0 .8rem}
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:0;padding:0;list-style:none;counter-reset:s}
+.how li{counter-increment:s;border-top:2px solid var(--ink);padding-top:.5rem;color:var(--soft);font-size:.98rem}
+.how li::before{content:"Step " counter(s);display:block;font:1.3rem var(--hand);color:var(--red)}
+.card{background:#fff;border:2px solid var(--ink);border-radius:6px;box-shadow:8px 8px 0 var(--ink);margin-block:1.8rem 3rem}
+.stage{overflow-x:auto;padding:.6rem}
+svg{display:block;width:100%;min-width:720px;height:auto;user-select:none}
+svg text{font-family:var(--display);fill:var(--ink)}
+.lbl{font-size:.42px;font-weight:600;text-anchor:middle}.sm{font-size:.3px;text-anchor:middle;fill:var(--soft)}
+.it,.pal{touch-action:none;cursor:grab}.locked .it{cursor:default}
+.table circle{fill:#c9a36b;stroke:#8c6236;stroke-width:.06}.table .in{fill:none;opacity:.55;stroke-width:.04}
+.chair circle{fill:#7fa8e6;stroke:#2f5fa8;stroke-width:.06}.chair .bk{fill:none;stroke:#2f5fa8;stroke-width:.1;stroke-linecap:round}
+.drag{opacity:.85}.bad circle{fill:#f4aaa5;stroke:#c0352d}.mov circle{stroke:var(--ink);stroke-width:.1}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:.8rem 1rem;padding:1rem 1.2rem;border-top:2px dashed var(--grid)}
+.cnt{font:1.3rem var(--hand);margin-right:auto}.cnt.eq{color:var(--green)}
+button{font:600 1rem var(--display);color:var(--ink);background:var(--pencil);border:0;border-radius:8px;padding:.7rem 1.2rem;cursor:pointer;box-shadow:0 4px 0 #c9a022}
+button:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 #c9a022}
+button.alt{background:#fff;border:2px solid var(--ink);box-shadow:0 4px 0 var(--ink)}
+button:disabled{opacity:.45;cursor:not-allowed}[hidden]{display:none!important}
+#msg{flex-basis:100%;margin:0;padding:.7rem 1rem;border-radius:6px;background:#eef4fb;border-left:6px solid var(--soft)}
+#msg.err{background:#fde8e6;border-color:var(--red)}#msg.ok{background:#e4f4ea;border-color:var(--green);font-weight:600}
+footer{background:var(--ink);color:var(--paper);padding-block:1.6rem;font-size:.95rem;border-top:6px solid var(--pencil)}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+@media(max-width:700px){nav{display:none}.how{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <a class="brand" href="index.html">RollyFly</a>
+  <nav aria-label="Main"><a href="index.html">Demo video</a><a href="interactive.html" aria-current="page">Try it yourself</a></nav>
+</div></header>
+
+<main class="wrap">
+  <section class="intro">
+    <span class="note">Your turn</span>
+    <h1>Rearrange the classroom yourself.</h1>
+    <ol class="how">
+      <li>Drag tables and chairs from the sides into the room. Pieces can touch but never overlap.</li>
+      <li>Confirm the layout. You need the same number of tables and chairs.</li>
+      <li>Press Rearrange and watch them form two circles, one piece at a time.</li>
+    </ol>
+  </section>
+
+  <div class="card">
+    <div class="stage">
+      <svg id="stage" viewBox="-3.9 -1.3 21.8 11.2" aria-label="Classroom floor plan with a table shelf on the left and a chair shelf on the right">
+        <defs><pattern id="fl" width="1" height="1" patternUnits="userSpaceOnUse"><rect width="1" height="1" fill="#f6f1e6"/><path d="M0 0H1V1" fill="none" stroke="#e3dac6" stroke-width=".03"/></pattern></defs>
+        <rect x="-3.7" y="0" width="3.2" height="9" rx=".2" fill="#eef4fb" stroke="#46557c" stroke-width=".05" stroke-dasharray=".25 .2"/>
+        <rect x="14.5" y="0" width="3.2" height="9" rx=".2" fill="#eef4fb" stroke="#46557c" stroke-width=".05" stroke-dasharray=".25 .2"/>
+        <text class="lbl" x="-2.1" y="1.1">Tables</text><text class="sm" x="-2.1" y="6.3">drag into the room</text>
+        <text class="lbl" x="16.1" y="1.1">Chairs</text><text class="sm" x="16.1" y="6.3">drag into the room</text>
+        <rect x="4.5" y="-.85" width="5" height=".6" rx=".08" fill="#1f3b33"/><text class="sm" x="7" y="-.43" style="fill:#f4f6ef">Blackboard</text>
+        <rect x="0" y="0" width="14" height="9" fill="url(#fl)" stroke="#1d2b4f" stroke-width=".2"/>
+        <g id="items"></g>
+      </svg>
+    </div>
+    <div class="bar">
+      <span class="cnt" id="cnt"></span>
+      <button id="bClear" class="alt" type="button">Clear all</button>
+      <button id="bLock" type="button">Confirm layout</button>
+      <button id="bGo" type="button" disabled>Rearrange</button>
+      <button id="bBack" class="alt" type="button" hidden>Edit layout</button>
+      <p id="msg" role="status" aria-live="polite">Drag a table or a chair into the room to begin.</p>
+    </div>
+  </div>
+</main>
+
+<footer><div class="wrap"><span>© <span id="year"></span> RollyFly</span><a href="mailto:info@example.com">info@example.com</a></div></footer>
+
+<script>
+(()=>{
+const W=14,H=9,TR=.6,CR=.3,MAXN=8,CLR=.03,SPEED=9,NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id),svg=$('stage'),layer=$('items'),msg=$('msg');
+let items=[],state='setup',drag=null,saved=[];
+$('year').textContent=new Date().getFullYear();
+
+/* ---------- items ---------- */
+function mk(type,x,y,parent){
+  const g=document.createElementNS(NS,'g');g.setAttribute('class','it '+type);
+  g.innerHTML=type==='table'?`<circle r="${TR}"/><circle class="in" r="${TR*.62}"/>`:`<circle r="${CR}"/><path class="bk" d="M-.2 -.224A.3 .3 0 0 1 .2 -.224"/>`;
+  (parent||layer).appendChild(g);
+  const it={type,r:type==='table'?TR:CR,x,y,a:0,g,ok:true,in:true};draw(it);return it;
+}
+function draw(it){it.g.setAttribute('transform',`translate(${it.x} ${it.y})`+(it.type==='chair'?` rotate(${it.a})`:''))}
+const count=t=>items.filter(i=>i.type===t).length;
+function counts(){const t=count('table'),c=count('chair'),e=$('cnt');e.textContent=`Tables: ${t}  ·  Chairs: ${c}`;e.classList.toggle('eq',t>0&&t===c)}
+function say(t,k){msg.textContent=t;msg.className=k||''}
+function clearAll(){items.forEach(i=>i.g.remove());items=[];counts()}
+function load(list){clearAll();list.forEach(s=>items.push(mk(s.type,s.x,s.y)));counts()}
+
+/* palette (unlimited supply) */
+const pal={table:mk('table',-2.1,4.5,svg),chair:mk('chair',16.1,4.5,svg)};
+for(const t in pal){const g=pal[t].g;g.classList.replace('it','pal');g.addEventListener('pointerdown',e=>{
+  if(state!=='setup')return;
+  if(count(t)>=MAXN){say(`The room holds up to ${MAXN} ${t}s. Remove one first.`,'err');return}
+  const it=mk(t,pal[t].x,pal[t].y);items.push(it);start(e,it,true)})}
+layer.addEventListener('pointerdown',e=>{
+  if(state!=='setup')return;const g=e.target.closest('.it');const it=items.find(i=>i.g===g);if(it)start(e,it,false)});
+
+/* ---------- dragging (placed pieces can never overlap) ---------- */
+function resolve(it,x,y){
+  for(let k=0;k<16;k++){
+    x=Math.min(Math.max(x,it.r+CLR),W-it.r-CLR);y=Math.min(Math.max(y,it.r+CLR),H-it.r-CLR);let moved=false;
+    for(const o of items){if(o===it||!o.ok||!o.in)continue;let dx=x-o.x,dy=y-o.y,d=Math.hypot(dx,dy);const m=it.r+o.r+.01;
+      if(d<m){if(d<1e-6){dx=1;dy=0;d=1}x=o.x+dx/d*m;y=o.y+dy/d*m;moved=true}}
+    if(!moved)break}
+  const bad=x<it.r||y<it.r||x>W-it.r||y>H-it.r||items.some(o=>o!==it&&o.ok&&o.in&&Math.hypot(x-o.x,y-o.y)<it.r+o.r-1e-6);
+  return bad?null:{x,y}}
+function pt(e){const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse())}
+function start(e,it,isNew){e.preventDefault();drag={it,isNew,prev:{x:it.x,y:it.y}};it.ok=false;it.in=false;it.g.classList.add('drag');layer.appendChild(it.g);svg.setPointerCapture(e.pointerId);move(e)}
+function move(e){
+  if(!drag)return;const p=pt(e),it=drag.it;it.in=p.x>0&&p.x<W&&p.y>0&&p.y<H;
+  if(it.in){const q=resolve(it,p.x,p.y);if(q){it.x=q.x;it.y=q.y;it.ok=true}else if(!it.ok){it.x=p.x;it.y=p.y}}
+  else{it.x=p.x;it.y=p.y;it.ok=false}
+  it.g.classList.toggle('bad',it.in&&!it.ok);draw(it)}
+function end(){
+  if(!drag)return;const{it,isNew,prev}=drag;drag=null;it.g.classList.remove('drag','bad');
+  if(it.ok){it.in=true}
+  else if(!isNew&&it.in){it.x=prev.x;it.y=prev.y;it.ok=true;draw(it)}
+  else{it.g.remove();items.splice(items.indexOf(it),1)}
+  counts();say(items.length?'Keep going, or confirm your layout when you are happy with it. Drag a piece out of the room to remove it.':'Drag a table or a chair into the room to begin.')}
+svg.addEventListener('pointermove',move);svg.addEventListener('pointerup',end);svg.addEventListener('pointercancel',end);
+
+/* ---------- planner: grid A* around circles, re-checked analytically ---------- */
+function space(r,others,s){
+  const D=[];for(const o of others){const d=Math.hypot(s.x-o.x,s.y-o.y),R=Math.min(r+o.r+CLR,d-1e-3);if(R>0)D.push([o.x,o.y,R])}
+  const sp={D,x0:Math.min(r+CLR,s.x),x1:Math.max(W-r-CLR,s.x),y0:Math.min(r+CLR,s.y),y1:Math.max(H-r-CLR,s.y)};
+  sp.free=(x,y)=>{if(x<sp.x0-1e-9||x>sp.x1+1e-9||y<sp.y0-1e-9||y>sp.y1+1e-9)return false;for(const[a,b,R]of D)if((x-a)**2+(y-b)**2<R*R-1e-9)return false;return true};
+  sp.seg=(a,b)=>{const n=Math.max(1,Math.ceil(Math.hypot(b.x-a.x,b.y-a.y)/.04));for(let k=0;k<=n;k++){const t=k/n;if(!sp.free(a.x+(b.x-a.x)*t,a.y+(b.y-a.y)*t))return false}return true};
+  return sp}
+class Heap{constructor(){this.a=[]}get n(){return this.a.length}
+  push(k,v){const a=this.a;a.push([k,v]);let i=a.length-1;while(i){const p=(i-1)>>1;if(a[p][0]<=a[i][0])break;[a[p],a[i]]=[a[i],a[p]];i=p}}
+  pop(){const a=this.a,t=a[0],l=a.pop();if(a.length){a[0]=l;let i=0;for(;;){let c=2*i+1;if(c>=a.length)break;if(c+1<a.length&&a[c+1][0]<a[c][0])c++;if(a[i][0]<=a[c][0])break;[a[i],a[c]]=[a[c],a[i]];i=c}}return t}}
+function astar(sp,s,g,res){
+  const nx=Math.floor((sp.x1-sp.x0)/res)+1,ny=Math.floor((sp.y1-sp.y0)/res)+1,m=.3*res,bl=new Uint8Array(nx*ny);
+  for(const[ox,oy,R]of sp.D){const RR=R+m,i0=Math.max(0,Math.floor((ox-RR-sp.x0)/res)),i1=Math.min(nx-1,Math.ceil((ox+RR-sp.x0)/res)),j0=Math.max(0,Math.floor((oy-RR-sp.y0)/res)),j1=Math.min(ny-1,Math.ceil((oy+RR-sp.y0)/res));
+    for(let j=j0;j<=j1;j++)for(let i=i0;i<=i1;i++){const px=sp.x0+i*res-ox,py=sp.y0+j*res-oy;if(px*px+py*py<RR*RR)bl[j*nx+i]=1}}
+  const cl=(v,n)=>Math.min(Math.max(v,0),n-1),si=cl(Math.round((s.x-sp.x0)/res),nx),sj=cl(Math.round((s.y-sp.y0)/res),ny),gi=cl(Math.round((g.x-sp.x0)/res),nx),gj=cl(Math.round((g.y-sp.y0)/res),ny),S=sj*nx+si,G=gj*nx+gi;
+  bl[S]=0;bl[G]=0;const gs=new Float64Array(nx*ny).fill(1e18),par=new Int32Array(nx*ny).fill(-1),cs=new Uint8Array(nx*ny);
+  const h=(i,j)=>{const dx=Math.abs(i-gi),dy=Math.abs(j-gj);return dx+dy-.5858*Math.min(dx,dy)},hp=new Heap();gs[S]=0;hp.push(h(si,sj),S);let ok=false;
+  while(hp.n){const u=hp.pop()[1];if(cs[u])continue;cs[u]=1;if(u===G){ok=true;break}const i=u%nx,j=(u/nx)|0;
+    for(let dj=-1;dj<=1;dj++)for(let di=-1;di<=1;di++){if(!di&&!dj)continue;const ni=i+di,nj=j+dj;if(ni<0||nj<0||ni>=nx||nj>=ny)continue;const v=nj*nx+ni;if(bl[v]||cs[v])continue;if(di&&dj&&(bl[j*nx+ni]||bl[nj*nx+i]))continue;
+      const ng=gs[u]+(di&&dj?1.41421:1);if(ng<gs[v]){gs[v]=ng;par[v]=u;hp.push(ng+h(ni,nj),v)}}}
+  if(!ok)return null;const c=[];for(let u=G;u!==-1;u=par[u])c.push(u);c.reverse();
+  const p=c.map(u=>({x:sp.x0+(u%nx)*res,y:sp.y0+((u/nx)|0)*res}));return p.length>1?[{...s},...p.slice(1,-1),{...g}]:[{...s},{...g}]}
+function simp(p,sp){
+  if(p.length<3)return p;const k=[p[0]];
+  for(let i=1;i<p.length-1;i++){const ax=p[i].x-p[i-1].x,ay=p[i].y-p[i-1].y,bx=p[i+1].x-p[i].x,by=p[i+1].y-p[i].y;if(Math.abs(ax*by-ay*bx)>1e-9||ax*bx+ay*by<=0)k.push(p[i])}
+  k.push(p[p.length-1]);const o=[k[0]];let i=0;while(i<k.length-1){let j=k.length-1;while(j>i+1&&!sp.seg(k[i],k[j]))j--;o.push(k[j]);i=j}return o}
+function plan(it,g,all){
+  const s={x:it.x,y:it.y};if(Math.hypot(g.x-s.x,g.y-s.y)<1e-6)return[s,{...g}];
+  const sp=space(it.r,all.filter(o=>o!==it),s);if(!sp.free(g.x,g.y))return null;if(sp.seg(s,g))return[s,{...g}];
+  for(const res of[.25,.12,.06]){const raw=astar(sp,s,g,res);if(!raw)continue;const p=simp(raw,sp);
+    if(p.every((q,i)=>!i||sp.seg(p[i-1],q)))return p;if(raw.every((q,i)=>!i||sp.seg(raw[i-1],q)))return raw}
+  return null}
+
+/* ---------- full plan: 1) park at the walls  2) tables inner circle, chairs outer circle ---------- */
+function buildPlan(){
+  const P=items.map(i=>({id:i,type:i.type,r:i.r,x:i.x,y:i.y,a:i.a})),moves=[];
+  const push=(o,path,a1)=>{moves.push({it:o.id,path,a0:o.a,a1});const e=path[path.length-1];o.x=e.x;o.y=e.y;o.a=a1};
+  const run=(list,fn)=>{let q=list.slice();while(q.length){const rest=q.filter(o=>!fn(o));if(rest.length===q.length)return false;q=rest}return true};
+  // wall slots
+  const sp=2*TR+.12,ins=TR+.13,c=[],S=[],used=new Set();
+  const edge=(ax,ay,bx,by)=>{const n=Math.ceil(Math.hypot(bx-ax,by-ay)/(sp/4));for(let k=0;k<=n;k++)c.push({x:ax+(bx-ax)*k/n,y:ay+(by-ay)*k/n})};
+  edge(ins,ins,W-ins,ins);edge(W-ins,ins,W-ins,H-ins);edge(W-ins,H-ins,ins,H-ins);edge(ins,H-ins,ins,ins);
+  for(const p of c)if(S.every(q=>Math.hypot(p.x-q.x,p.y-q.y)>=sp-1e-6))S.push(p);
+  const wd=o=>Math.min(o.x,W-o.x,o.y,H-o.y);
+  const park=o=>{const cand=S.filter(s=>!used.has(s)).sort((a,b)=>Math.hypot(a.x-o.x,a.y-o.y)-Math.hypot(b.x-o.x,b.y-o.y));
+    for(const s of cand){if(P.some(p=>p!==o&&Math.hypot(s.x-p.x,s.y-p.y)<o.r+p.r+.1))continue;const path=plan(o,s,P);if(path){push(o,path,o.a);used.add(s);return true}}return false};
+  if(!run(P.slice().sort((a,b)=>wd(a)-wd(b)),park))return null;
+  // circles (same centre)
+  const cx=W/2,cy=H/2,T=P.filter(o=>o.type==='table'),C=P.filter(o=>o.type==='chair'),n=T.length;
+  const Rt=n>1?1.35/(2*Math.sin(Math.PI/n)):0,Rc=Math.max(Rt+1,n>1?.75/(2*Math.sin(Math.PI/n)):0);
+  const ring=R=>Array.from({length:n},(_,k)=>{const t=2*Math.PI*k/n-Math.PI/2;return{x:cx+R*Math.cos(t),y:cy+R*Math.sin(t),t}});
+  const ang=o=>Math.atan2(o.y-cy,o.x-cx);
+  const assign=(L,pp)=>{const a=L.slice().sort((p,q)=>ang(p)-ang(q)),b=pp.slice().sort((p,q)=>ang(p)-ang(q));let best=0,bc=1e18;
+    for(let s=0;s<n;s++){let k=0;for(let i=0;i<n;i++)k+=Math.hypot(a[i].x-b[(i+s)%n].x,a[i].y-b[(i+s)%n].y);if(k<bc){bc=k;best=s}}
+    return a.map((o,i)=>[o,b[(i+best)%n]])};
+  const jobs=[...assign(T,ring(Rt)),...assign(C,ring(Rc))];
+  const go=([o,p])=>{const path=plan(o,p,P);if(!path)return false;
+    let a1=o.a;if(o.type==='chair'){const want=p.t*180/Math.PI+90;a1=o.a+((((want-o.a+180)%360)+360)%360-180)}
+    push(o,path,a1);return true};
+  return run(jobs,go)?moves:null}
+
+/* ---------- animation ---------- */
+function play(moves,done){
+  let i=0;const next=()=>{
+    if(i>=moves.length){done();return}
+    const m=moves[i++],it=m.it,p=m.path,seg=[];let L=0;for(let k=1;k<p.length;k++){const d=Math.hypot(p[k].x-p[k-1].x,p[k].y-p[k-1].y);seg.push(d);L+=d}
+    const dur=Math.max(.25,L/SPEED),t0=performance.now();it.g.classList.add('mov');layer.appendChild(it.g);
+    const f=now=>{const u=Math.min(1,(now-t0)/1000/dur),e=u*u*(3-2*u);let d=e*L,k=0;while(k<seg.length-1&&d>seg[k]){d-=seg[k];k++}
+      const A=p[k],B=p[k+1]||p[k],t=seg[k]?Math.min(1,d/seg[k]):1;it.x=A.x+(B.x-A.x)*t;it.y=A.y+(B.y-A.y)*t;it.a=m.a0+(m.a1-m.a0)*e;draw(it);
+      if(u<1)requestAnimationFrame(f);else{it.g.classList.remove('mov');setTimeout(next,60)}};
+    requestAnimationFrame(f)};
+  next()}
+
+/* ---------- buttons / states ---------- */
+const bL=$('bLock'),bG=$('bGo'),bB=$('bBack'),bC=$('bClear');
+function ui(){
+  bL.disabled=state!=='setup';bL.textContent=state==='setup'?'Confirm layout':'Layout locked';
+  bC.hidden=state!=='setup';bG.disabled=state!=='locked';
+  bB.hidden=!(state==='locked'||state==='done');bB.textContent=state==='done'?'Try again':'Edit layout';
+  svg.classList.toggle('locked',state!=='setup')}
+bL.onclick=()=>{
+  const t=count('table'),c=count('chair');
+  if(!t&&!c)return say('The room is empty. Drag some tables and chairs into it first.','err');
+  if(t!==c){const d=Math.abs(t-c);return say(`You have ${t} table${t===1?'':'s'} and ${c} chair${c===1?'':'s'}. Please add ${d} more ${t<c?'table':'chair'}${d===1?'':'s'} so both numbers are the same.`,'err')}
+  saved=items.map(i=>({type:i.type,x:i.x,y:i.y}));state='locked';ui();say(`Layout locked: ${t} tables and ${c} chairs. Press Rearrange.`)};
+bG.onclick=()=>{
+  state='running';ui();say('Planning safe paths…');
+  setTimeout(()=>{const moves=buildPlan();
+    if(!moves){state='locked';ui();return say('Some pieces are boxed in, so no safe path exists. Edit the layout and leave a little more space between them.','err')}
+    say('Rearranging… first everything moves to the walls, then the circles form.');
+    play(moves,()=>{state='done';ui();say('Done! Every table and chair is in place, and nothing overlapped.','ok')})},30)};
+bB.onclick=()=>{state='setup';load(saved);ui();say('Edit your layout, then confirm it again.')};
+bC.onclick=()=>{clearAll();say('Drag a table or a chair into the room to begin.')};
+counts();ui();
+})();
+</script>
+</body>
+</html>
